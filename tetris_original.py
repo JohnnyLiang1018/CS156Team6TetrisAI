@@ -1,55 +1,53 @@
 #!/usr/local/bin/python3
 
+# The game & controller part of the Tetris AI project
+# Followed Tetris game tutorial to do the game: https://www.jianshu.com/p/48f18db71f81
+
 import pygame
 import random
 import os
+import Controller
 
 pygame.init()
 
-GRID_WIDTH = 40 # the width of a square
-GRID_NUM_WIDTH = 10 # the number of square horizontally
-GRID_NUM_HEIGHT = 25 # the number of square vertically
-WIDTH, HEIGHT = GRID_WIDTH * GRID_NUM_WIDTH, GRID_WIDTH * GRID_NUM_HEIGHT
-SIDE_WIDTH = 200 # the width of infomation (score, level, next shape ...) part
-SCREEN_WIDTH = WIDTH + SIDE_WIDTH # the completed window width, height keep same
-WHITE = (0xff, 0xff, 0xff)
-BLACK = (0, 0, 0)
-LINE_COLOR = (0x33, 0x33, 0x33) # color of empty square's lines
+CubeWidth = 40  # the width of a square
+CubeNumX = 10  # the number of square horizontally
+CubeNumY = 10  # the number of square vertically
+BoardWidth = CubeWidth * CubeNumX
+BoardHeight = CubeWidth * CubeNumY
+AdditionalWidth = 200  # the width of infomation (score, level, next shape ...) part
+WindowWidth = BoardWidth + AdditionalWidth  # the completed window width, height keep same
+
+# set game window
+screen = pygame.display.set_mode((WindowWidth, BoardHeight))  # set the screen
+pygame.display.set_caption("Tetris")  # set window name
+
+# set the file root directory to  be current folder
+base_folder = os.path.dirname(__file__)
+
+live_cube = None
+next_cube = None
+
+# set the format of the text (for score
+
+white = (0xff, 0xff, 0xff)
+black = (0, 0, 0)
+LineColor = (0x33, 0x33, 0x33)  # color of empty square's lines
+
 
 # the color of pieces
-CUBE_COLORS = [
+ShapeColor = [
     (0xcc, 0x99, 0x99), (0xff, 0xff, 0x99), (0x66, 0x66, 0x99),
     (0x99, 0x00, 0x66), (0xff, 0xcc, 0x00), (0xcc, 0x00, 0x33),
     (0xff, 0x00, 0x33), (0x00, 0x66, 0x99), (0xff, 0xff, 0x33),
     (0x99, 0x00, 0x33), (0xcc, 0xff, 0x66), (0xff, 0x99, 0x00)
 ]
 
-# set game window
-screen = pygame.display.set_mode((SCREEN_WIDTH, HEIGHT)) # set the screen
-pygame.display.set_caption("Tetris") # set window name
-clock = pygame.time.Clock() # time
-FPS = 30 # speed
-
-score = 0
-level = 1
-
-screen_color_matrix = [[None] * GRID_NUM_WIDTH for i in range(GRID_NUM_HEIGHT)]
-
-
-# set the file root directory to  be current folder
-base_folder = os.path.dirname(__file__)
-
-# set the format of the text (for score
-def show_text(surf, text, size, x, y, color=WHITE):
-    font_name = os.path.join(base_folder, 'font/font.ttc')
-    font = pygame.font.Font(font_name, size)
-    text_surface = font.render(text, True, color)
-    text_rect = text_surface.get_rect()
-    text_rect.midtop = (x, y)
-    surf.blit(text_surface, text_rect)
-
-
-class CubeShape(object):
+#####################
+# Shape classes
+# represent the operations of the pieces on the board
+#####################
+class Shape(object):
     SHAPES = ['I', 'J', 'L', 'O', 'S', 'T', 'Z']
     I = [[(0, -1), (0, 0), (0, 1), (0, 2)],
          [(-1, 0), (0, 0), (1, 0), (2, 0)]]
@@ -75,11 +73,13 @@ class CubeShape(object):
     }
 
     def __init__(self):
-        self.shape = self.SHAPES[random.randint(0, len(self.SHAPES) - 1)]
-        # 骨牌所在的行列
-        self.center = (2, GRID_NUM_WIDTH // 2)
+
+        self.shapeId = random.randint(0, len(self.SHAPES) - 1)
+        self.shape = self.SHAPES[self.shapeId]
+        # the position of the piece
+        self.center = (2, CubeNumX // 2) # [0]: Y [1]: X
         self.dir = random.randint(0, len(self.SHAPES_WITH_DIR[self.shape]) - 1)
-        self.color = CUBE_COLORS[random.randint(0, len(CUBE_COLORS) - 1)]
+        self.color = ShapeColor[random.randint(0, len(ShapeColor) - 1)]
 
     def get_all_gridpos(self, center=None):
         curr_shape = self.SHAPES_WITH_DIR[self.shape][self.dir]
@@ -91,12 +91,12 @@ class CubeShape(object):
 
     def conflict(self, center):
         for cube in self.get_all_gridpos(center):
-            # 超出屏幕之外，说明不合法
-            if cube[0] < 0 or cube[1] < 0 or cube[0] >= GRID_NUM_HEIGHT or\
-                    cube[1] >= GRID_NUM_WIDTH:
+            # exceed screen, illegal
+            if cube[0] < 0 or cube[1] < 0 or cube[0] >= CubeNumY or \
+                    cube[1] >= CubeNumX:
                 return True
 
-            # 不为None，说明之前已经有小方块存在了，也不合法
+            # if None, already exists cubes, illegal
             if screen_color_matrix[cube[0]][cube[1]] is not None:
                 return True
 
@@ -137,56 +137,71 @@ class CubeShape(object):
     def draw(self):
         for cube in self.get_all_gridpos():
             pygame.draw.rect(screen, self.color,
-                             (cube[1] * GRID_WIDTH, cube[0] * GRID_WIDTH,
-                              GRID_WIDTH, GRID_WIDTH))
-            pygame.draw.rect(screen, WHITE,
-                             (cube[1] * GRID_WIDTH, cube[0] * GRID_WIDTH,
-                              GRID_WIDTH, GRID_WIDTH),
+                             (cube[1] * CubeWidth, cube[0] * CubeWidth,
+                              CubeWidth, CubeWidth))
+            pygame.draw.rect(screen, white,
+                             (cube[1] * CubeWidth, cube[0] * CubeWidth,
+                              CubeWidth, CubeWidth),
                              1)
+
+
+
+
+
+def show_text(surf, text, size, x, y, color=white):
+    font_name = os.path.join(base_folder, 'font/font.ttc')
+    font = pygame.font.Font(font_name, size)
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    surf.blit(text_surface, text_rect)
 
 
 # draw empty squares
 def draw_grids():
-    for i in range(GRID_NUM_WIDTH):
-        pygame.draw.line(screen, LINE_COLOR,
-                         (i * GRID_WIDTH, 0), (i * GRID_WIDTH, HEIGHT))
+    for i in range(CubeNumX):
+        pygame.draw.line(screen, LineColor,
+                         (i * CubeWidth, 0), (i * CubeWidth, BoardHeight))
 
-    for i in range(GRID_NUM_HEIGHT):
-        pygame.draw.line(screen, LINE_COLOR,
-                         (0, i * GRID_WIDTH), (WIDTH, i * GRID_WIDTH))
+    for i in range(CubeNumY):
+        pygame.draw.line(screen, LineColor,
+                         (0, i * CubeWidth), (BoardWidth, i * CubeWidth))
 
-    pygame.draw.line(screen, WHITE,
-                     (GRID_WIDTH * GRID_NUM_WIDTH, 0),
-                     (GRID_WIDTH * GRID_NUM_WIDTH, GRID_WIDTH * GRID_NUM_HEIGHT))
+    pygame.draw.line(screen, white,
+                     (CubeWidth * CubeNumX, 0),
+                     (CubeWidth * CubeNumX, CubeWidth * CubeNumY))
 
 
 # draw existed pieces to square
 def draw_matrix():
-    for i, row in zip(range(GRID_NUM_HEIGHT), screen_color_matrix):
-        for j, color in zip(range(GRID_NUM_WIDTH), row):
+    for i, row in zip(range(CubeNumY), screen_color_matrix):
+        for j, color in zip(range(CubeNumX), row):
             if color is not None:
                 pygame.draw.rect(screen, color,
-                            (j * GRID_WIDTH, i * GRID_WIDTH,
-                             GRID_WIDTH, GRID_WIDTH))
-                pygame.draw.rect(screen, WHITE,
-                            (j * GRID_WIDTH, i * GRID_WIDTH,
-                             GRID_WIDTH, GRID_WIDTH), 2)
+                                 (j * CubeWidth, i * CubeWidth,
+                                  CubeWidth, CubeWidth))
+                pygame.draw.rect(screen, white,
+                                 (j * CubeWidth, i * CubeWidth,
+                                  CubeWidth, CubeWidth), 2)
 
 
 def draw_score():
-    show_text(screen, u'Score：{}'.format(score), 20, WIDTH + SIDE_WIDTH // 2, 100)
+    show_text(screen, u'Score：{}'.format(score), 20, BoardWidth + AdditionalWidth // 2, 100)
+    if(live_cube != None and next_cube != None):
+        show_text(screen, u'Current shape:{}'.format(live_cube.SHAPES[live_cube.shapeId]), 20, BoardWidth + AdditionalWidth // 2, 120)
+        show_text(screen, u'Next shape:{}'.format(next_cube.SHAPES[next_cube.shapeId]), 20, BoardWidth + AdditionalWidth // 2, 140)
 
 
 def remove_full_line():
     global screen_color_matrix
     global score
     global level
-    new_matrix = [[None] * GRID_NUM_WIDTH for i in range(GRID_NUM_HEIGHT)]
-    index = GRID_NUM_HEIGHT - 1
+    new_matrix = [[None] * CubeNumX for i in range(CubeNumY)]
+    index = CubeNumY - 1
     n_full_line = 0
-    for i in range(GRID_NUM_HEIGHT - 1, -1, -1):
+    for i in range(CubeNumY - 1, -1, -1):
         is_full = True
-        for j in range(GRID_NUM_WIDTH):
+        for j in range(CubeNumX):
             if screen_color_matrix[i][j] is None:
                 is_full = False
                 continue
@@ -201,25 +216,43 @@ def remove_full_line():
 
 
 def show_welcome(screen):
-    show_text(screen, u'TETRIS', 30, WIDTH / 2, HEIGHT / 2)
-    show_text(screen, u'press any key to start the game', 20, WIDTH / 2, HEIGHT / 2 + 50)
+    show_text(screen, u'TETRIS', 30, BoardWidth / 2, BoardHeight / 2)
+    show_text(screen, u'press any key to start the game', 20, BoardWidth / 2, BoardHeight / 2 + 50)
 
 
 # run the game
+screen_color_matrix = [[None] * CubeNumX for i in range(CubeNumY)]
+
+clock = pygame.time.Clock()  # time
+FPS = 30  # speed
+
+counter = 0
+score = 0
+level = 1
+
 running = True
 gameover = True
-counter = 0
-live_cube = None
+
+
+
 while running:
     clock.tick(FPS)
+    Controller.setMatrix(screen_color_matrix)
     # set events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
         elif event.type == pygame.KEYDOWN:
-            if gameover:
+            if gameover:  # game over is true in the beginning
                 gameover = False
-                live_cube = CubeShape()
+                if next_cube == None:
+                    Controller.history
+                    live_cube = Shape()
+                else:
+                    live_cube = next_cube
+                next_cube = Shape()
+                Controller.setCurrentCube(live_cube)
+                # get new shape, send to control
                 break
             if event.key == pygame.K_LEFT:
                 live_cube.left()
@@ -238,18 +271,24 @@ while running:
     if gameover is False and counter % (FPS // level) == 0:
         #  down() return false = exceed screen or conflict with prior cubes
         if live_cube.down() == False:
+
             for cube in live_cube.get_all_gridpos():
                 screen_color_matrix[cube[0]][cube[1]] = live_cube.color
-            live_cube = CubeShape()
+
+            live_cube = next_cube
+            next_cube = Shape()
+            Controller.setCurrentCube(live_cube)
             if live_cube.conflict(live_cube.center):
                 gameover = True
                 score = 0
                 live_cube = None
-                screen_color_matrix = [[None] * GRID_NUM_WIDTH for i in range(GRID_NUM_HEIGHT)]
+                screen_color_matrix = [[None] * CubeNumX for i in range(CubeNumY)]
+
         remove_full_line()
+        Controller.getMatrix()
     counter += 1
     # update screen
-    screen.fill(BLACK)
+    screen.fill(black)
     draw_grids()
     draw_matrix()
     draw_score()
@@ -258,3 +297,15 @@ while running:
     if gameover:
         show_welcome(screen)
     pygame.display.update()
+
+class game:
+    def __init__(self,controller):
+        self.contro=controller
+        self.CubeWidth = 40  # the width of a square
+        self.CubeNumX = 10  # the number of square horizontally
+        self.CubeNumY = 10  # the number of square vertically
+        self.BoardWidth = CubeWidth * CubeNumX
+        self.BoardHeight = CubeWidth * CubeNumY
+        self.AdditionalWidth = 200  # the width of infomation (score, level, next shape ...) part
+        self.WindowWidth = BoardWidth + AdditionalWidth  # the completed window width, height keep same
+
