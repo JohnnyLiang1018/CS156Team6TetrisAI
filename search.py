@@ -6,6 +6,7 @@ class search:
     )
 
     def weightCalculate(self,stateList):
+        return None
 
 
 
@@ -22,7 +23,7 @@ class search:
         
         return max_weight_index
     
-    
+
             
 
             
