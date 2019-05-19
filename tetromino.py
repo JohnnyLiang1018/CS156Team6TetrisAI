@@ -511,7 +511,10 @@ class game:
         # draw the "next" piece
         game.drawPiece(self,piece, pixelx=WINDOWWIDTH - 120, pixely=100)
 
-
-
+    def transfer(gameBoard, controllerBoard):
+        for x in range(controllerBoard):
+            for y in range(controllerBoard[0]):
+                if (controllerBoard[x][y] == 1):
+                    gameBoard[y][x] = 0
 
 
