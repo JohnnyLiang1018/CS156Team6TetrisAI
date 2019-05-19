@@ -23,7 +23,7 @@ def draw_grids():
     for i in range (grid_height):
         pygame.draw.line(screen, line_color,(0, i * cube_width), (height, i * cube_width))
 
-# run the game
+
 clock = pygame.time.Clock()
 FPS = 30
 
