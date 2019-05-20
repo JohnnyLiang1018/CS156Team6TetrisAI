@@ -1,0 +1,218 @@
+[1mdiff --git a/Tetris_AI b/Tetris_AI[m
+[1mindex 482d2d0..48f3ea4 100644[m
+[1m--- a/Tetris_AI[m
+[1m+++ b/Tetris_AI[m
+[36m@@ -2,105 +2,86 @@[m [mimport numpy as np[m
+ [m
+ [m
+ board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)[m
+[31m-counter=0[m
+[32m+[m
+ [m
+ class Mask:[m
+     I0 = (np.array([[1, 1, 1, 1],[m
+[31m-                    [1j, 1j, 1j, 1j]]), 4,"I",0)[m
+[32m+[m[32m                    [1j, 1j, 1j, 1j]]), 4,"I0")[m
+ [m
+     I1 = (np.array([[1],[m
+                     [1],[m
+                     [1],[m
+                     [1],[m
+[31m-                    [1j]]), 1,"I",1)[m
+[32m+[m[32m                    [1j]]), 1,"I1")[m
+ [m
+     L0 = (np.array([[0, 0, 1],[m
+                     [1, 1, 1],[m
+[31m-                    [1j, 1j, 1j]]), 3,"L",0)[m
+[32m+[m[32m                    [1j, 1j, 1j]]), 3,"L0")[m
+ [m
+     L1 = (np.array([[1, 0],[m
+                     [1, 0],[m
+                     [1, 1],[m
+[31m-                    [1j, 1j]]), 2,"L",1)[m
+[32m+[m[32m                    [1j, 1j]]), 2,"L1")[m
+ [m
+     L2 = (np.array([[1, 1, 1],[m
+                     [1, 1j, 1j],[m
+[31m-                    [1j, 0, 0]]), 3,"L",2)[m
+[32m+[m[32m                    [1j, 0, 0]]), 3,"L2")[m
+ [m
+     L3 = (np.array([[1, 1],[m
+                     [1j, 1],[m
+                     [0, 1],[m
+[31m-                    [0, 1j]]), 2,"L",3)[m
+[32m+[m[32m                    [0, 1j]]), 2,"L3")[m
+ [m
+     J0 = (np.array([[1, 1, 1],[m
+                     [1j, 1j, 1],[m
+[31m-                    [0, 0, 1j]]), 3,"J",0)[m
+[32m+[m[32m                    [0, 0, 1j]]), 3,"J0")[m
+ [m
+     J1 = (np.array([[0, 1],[m
+                     [0, 1],[m
+                     [1, 1],[m
+[31m-                    [1j, 1j]]), 2,"J",1)[m
+[32m+[m[32m                    [1j, 1j]]), 2,"J1")[m
+ [m
+     J2 = (np.array([[0, 0, 1],[m
+                     [1, 1, 1],[m
+[31m-                    [1j, 1j, 1j]]), 3,"J",2)[m
+[32m+[m[32m                    [1j, 1j, 1j]]), 3,"J2")[m
+ [m
+     J3 = (np.array([[1, 1],[m
+                     [1, 1j],[m
+                     [1, 0],[m
+[31m-                    [1j, 0]]), 2,"J",3)[m
+[32m+[m[32m                    [1j, 0]]), 2,"J3")[m
+ [m
+     S0 = (np.array([[0, 1, 1],[m
+                     [1, 1, 1j],[m
+[31m-                    [1j, 1j, 0]]), 3,"S",0)[m
+[32m+[m[32m                    [1j, 1j, 0]]), 3,"S0")[m
+ [m
+     S1 = (np.array([[1, 0],[m
+                     [1, 1],[m
+                     [1j, 1],[m
+[31m-                    [0, 1j]]), 2,"S",1)[m
+[32m+[m[32m                    [0, 1j]]), 2,"S1")[m
+ [m
+     Z0 = (np.array([[1, 1, 0],[m
+                     [1j, 1, 1],[m
+[31m-                    [0, 1j, 1j]]), 3,"Z",0)[m
+[32m+[m[32m                    [0, 1j, 1j]]), 3,"Z0")[m
+ [m
+     Z1 = (np.array([[0, 1],[m
+                     [1, 1],[m
+                     [1, 1j],[m
+[31m-                    [1j, 0]]), 2,"Z",1)[m
+[31m-    O = (np.array([[1,1],[m
+[31m-                  [1,1],[m
+[31m-                  [1j,1j]]), 2 ,"O",0)[m
+[32m+[m[32m                    [1j, 0]]), 2,"Z1")[m
+ [m
+[31m-    T0 = (np.array([[0,1,0],[m
+[31m-                 [1,1,1],[m
+[31m-                 [1j,1j,1j]]), 3,"T",0)[m
+[32m+[m[32m    mask_dir = {"I": list([I0, I1]),[m
+ [m
+[31m-    T1 = (np.array([[1,0],[m
+[31m-                 [1,1],[m
+[31m-                 [1,1j],[m
+[31m-                 [1j,0]]), 2 ,"T",1)[m
+[32m+[m[32m                "L": list([L0, L1, L2, L3]),[m
+ [m
+[31m-    T2 =(np.array([[1,1,1],[m
+[31m-                  [1j,1,1j],[m
+[31m-                  [0,1j,0]]), 3,"T",2)[m
+[31m-    T3= (np.array([[0,1],[m
+[31m-                   [1,1],[m
+[31m-                   [1j,1],[m
+[31m-                   [0,1j]]), 2 ,"T",3)[m
+[32m+[m[32m                "J": list([J0, J1, J2, J3]),[m
+ [m
+[32m+[m[32m                "S": list([S0, S1]),[m
+[32m+[m
+[32m+[m[32m                "Z": list([Z0, Z1])[m
+[32m+[m[32m                }[m
+ [m
+ [m
+ [m
+[31m-    mask_dir = {[m
+[31m-                "I": list([I0, I1]),[m
+[31m-                "L": list([L0, L1, L2, L3]),[m
+[31m-                "J": list([J0, J1, J2, J3]),[m
+[31m-                "S": list([S0, S1]),[m
+[31m-                "Z": list([Z0, Z1]),[m
+[31m-                "T": list([T0,T1,T2,T3]),[m
+[31m-                "O": list([O])[m
+ [m
+[31m-                }[m
+ [m
+ [m
+ Board_width=10[m
+[36m@@ -112,113 +93,46 @@[m [mdef height(num):[m
+ [m
+ class Kb:[m
+ [m
+[31m-    def __init__(self):[m
+[31m-        self.board=None[m
+ [m
+[31m-        # cut slice into small rectangle[m
+[31m-        # slice: an m x n submatrix from getValidPosition[m
+[31m-        #### ###################[m
+[31m-        #### ###################[m
+[31m-        #### ###################[m
+[31m-        # ^[m
+[31m-        # |[m
+[31m-        #target rectangle:  this shape is equal to the shape of mask[m
+[32m+[m[32m    def Rec_scanner(board, mask_kit, height, name):[m
+[32m+[m[32m        mask = mask_kit[0][m
+[32m+[m[32m        num_of_support = mask_kit[1][m
+ [m
+[31m-    def Rec_scanner(self,board, mask_kit, height, name,type):[m
+         boardwidth = board.shape[1][m
+[31m-        mask_n = mask_kit[0].shape[1][m
+[32m+[m[32m        mask_n = mask.shape[1][m
+         result = list()[m
+         for num in range(0, boardwidth - mask_n + 1):[m
+             tmp = board[:, num:num + mask_n][m
+[31m-            if (Kb.bit_match(self,tmp,mask_kit)):[m
+[31m-                result.append(tuple((name,type, (height, num))))[m
+[31m-        return result[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-[m
+ [m
+[32m+[m[32m            bit_match = np.multiply(mask, tmp).sum()[m
+[32m+[m[32m            real = bit_match.real[m
+[32m+[m[32m            if (real == 4 and np.abs(bit_match - real) < num_of_support):[m
+[32m+[m[32m                result.append(tuple((name, (height, num))))[m
+[32m+[m[32m        return result[m
+ [m
+[31m-    #cut board into slices[m
+[31m-        #######################[m
+[31m-        #######################[m
+[31m-        #######################  <= unseen part of board[m
+[31m-        #######################[m
+[31m-        #######################[m
+ [m
+[31m-        # slice: an m x n submatrix[m
+[31m-              #   n[m
+[31m-        #######################[m
+[31m-   #m   #######################   <- target slice[m
+[31m-        #######################[m
+[31m-        # m= m of mask shape[m
+[31m-    def getValidPositions(self,board, shape):[m
+[32m+[m[32m    def getValidPositions(board, shape):[m
+         mask_kit = Mask.mask_dir.get(shape)[m
+         result = list()[m
+[32m+[m
+         for mask in mask_kit:[m
+             name = mask[2][m
+[31m-            type = mask[3][m
+             mask_m = mask[0].shape[0][m
+             mask_result = list()[m
+             for num in range(0, Board_length - mask_m):[m
+                 slice = board[height(num) - mask_m + 1:height(num) + 1, :][m
+[31m-                sum = board.sum()[m
+[31m-                if (board.size - sum != 0 and sum >= 4):[m
+[31m-                    mask_result.extend(Kb.Rec_scanner(self,slice, mask, num, name,type))[m
+[31m-                else:[m
+[31m-                    break[m
+[31m-            result.extend(mask_result)[m
+[31m-[m
+[31m-        return result[m
+[31m-        # is support && have space[m
+[31m-[m
+[31m-    def ask(self,shape):[m
+[31m-        if (self.board.sum() != 0):[m
+[31m-            return Kb.getValidPositions(self, board, shape)[m
+[31m-[m
+[31m-    def tell(self,result_kit):[m
+[31m-        loca=result_kit[2][m
+[31m-        mask_kits=Mask.mask_dir.get(result_kit[0])[m
+[31m-        mask_kit=mask_kits[result_kit[1]][m
+[31m-        target=self.board[height(loca[0]) - mask_kit[0].shape[0]+1: height(loca[0])+1, loca[1]:loca[1] + mask_kit[0].shape[1]][m
+[31m-        if(Kb.bit_match(self,target,mask_kit)):[m
+[31m-            self.board[height(loca[0]) - mask_kit[0].shape[0] + 1: height(loca[0]) + 1,loca[1]:loca[1] + mask_ki

@@ -1,29 +1,33 @@
+import kb
+import tetirs_AI
+
 class search:
-
-    stateList = (
-        (x,y,rotate_num),
-        (x_1,y_1,rotate_num)
-    )
-
-    def weightCalculate(self,stateList):
-        return None
-
-
-
-    def solutionSearch(self,weightList):
-
-        max_weight_index = None
-        max_weight = 0
-
-        for i in range(len(weightList)):
-            current_weight = weightList[i]
-            if (current_weight > max_weight):
-                max_weight_index = i
-                max_weight = current_weight
-        
-        return max_weight_index
     
+    array = ["J","K",2]
+    knowledge_base = None
+    tetris_ai = None
 
+    def __init__(self):
+        self.knowledge_base = kb.kb()
+        self.tetris_ai = tetirs_AI.Kb()
+
+    def dfs(self,array):
+        index = array[2]
+        if(index == 0):
+            return self.evaluate()
+
+        piece = array[index-2]
+        # for k in range(4):
+        for j in range(10):
+            output = self.tetris_ai.ask(piece)
+            y = output[0][2][1]
+            self.knowledge_base.kb_ask(["update_board",[piece,(j,0)]])
+            
+            
+                
+    
+    def evaluate(self):
+        return None
             
 
             

@@ -36,10 +36,10 @@ def getLandingHeights(shape):
 
 
 def getNumFullLines(currrentShape,center,station):
-    tempBoard = getNewBoard(center,station)
+    tempBoard = this.getNewBoard(center,station)
     completedLines = 0
     usedBlocks = 0
-    possiblePositions = getAllPossiblePositions(center,currrentShape,station)
+    possiblePositions = this.getAllPossiblePositions(center,currrentShape,station)
     for i in range(len(tempBoard)-1,0,1):
         cubeCounter = 0
         for j in range(len(tempBoard[1])):

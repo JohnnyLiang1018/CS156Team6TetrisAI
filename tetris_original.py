@@ -9,10 +9,10 @@ import os
 import Controller
 
 pygame.init()
-
+controller = Controller.Controller()
 CubeWidth = 40  # the width of a square
 CubeNumX = 10  # the number of square horizontally
-CubeNumY = 10  # the number of square vertically
+CubeNumY = 20  # the number of square vertically
 BoardWidth = CubeWidth * CubeNumX
 BoardHeight = CubeWidth * CubeNumY
 AdditionalWidth = 200  # the width of infomation (score, level, next shape ...) part
@@ -237,7 +237,7 @@ gameover = True
 
 while running:
     clock.tick(FPS)
-    Controller.setMatrix(screen_color_matrix)
+    controller.setMatrix(screen_color_matrix)
     # set events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -246,12 +246,12 @@ while running:
             if gameover:  # game over is true in the beginning
                 gameover = False
                 if next_cube == None:
-                    Controller.history
+                    controller.history
                     live_cube = Shape()
                 else:
                     live_cube = next_cube
                 next_cube = Shape()
-                Controller.setCurrentCube(live_cube)
+                controller.setCurrentCube(live_cube)
                 # get new shape, send to control
                 break
             if event.key == pygame.K_LEFT:
@@ -277,7 +277,7 @@ while running:
 
             live_cube = next_cube
             next_cube = Shape()
-            Controller.setCurrentCube(live_cube)
+            controller.setCurrentCube(live_cube)
             if live_cube.conflict(live_cube.center):
                 gameover = True
                 score = 0
@@ -285,7 +285,7 @@ while running:
                 screen_color_matrix = [[None] * CubeNumX for i in range(CubeNumY)]
 
         remove_full_line()
-        Controller.getMatrix()
+        controller.getMatrix()
     counter += 1
     # update screen
     screen.fill(black)
