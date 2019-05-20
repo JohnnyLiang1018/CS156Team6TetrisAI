@@ -112,9 +112,11 @@ def height(num):
 
 class Kb:
 
-    def __init__(self):
-        self.board=None
-
+    def __init__(self,controller):
+        self.board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
+        self.controller=controller
+        for x in range(0,100):
+            self.controller.push(self.board,0)
         # cut slice into small rectangle
         # slice: an m x n submatrix from getValidPosition
         #### ###################
@@ -194,32 +196,4 @@ class Kb:
         if( support_limit >support and real == 4):
             return True
 
-
-
-class searchEngine:
-
-    #number of hole
-    consistent_heuristic=0
-
-
-
-
-
-kb=Kb()
-kb.board=board
-
-
-kb.tell(("I",0,(0,0)))
-print(kb.board)
-print()
-kb.tell(("J",1,(1,0)))
-print(kb.board)
-print()
-kb.tell(("S",1,(0,5)))
-print(kb.board)
-print()
-kb.tell(("T",1,(2,2)))
-print(kb.board)
-print()
-print(kb.ask("T"))
 

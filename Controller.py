@@ -7,6 +7,8 @@
 # and get it show on the board
 ############################
 import kb
+import tetromino
+import tetris_AI
 
 currentCube = None
 screen_color_matrix = []
@@ -45,4 +47,27 @@ class Controller:
         # prepare to send
         print('get current matrix', screen_color_matrix)
         return screen_color_matrix
+        self.blocks=list()
+        self.boards=list()
+
+    def push(self,item,num):
+        if(num==0): self.boards.append(item)
+        if(num==1): self.blocks.append(item)
+        print(item)
+
+    def pop(self,num):
+        if (num == 0): return self.boards.pop(0)
+        if (num == 1): return self.blocks.pop(0)
+
+
+
+
+controller=Controller()
+kb=tetris_AI.Kb(controller)
+
+game=tetromino.game(controller)
+game.main()
+
+
+
 
