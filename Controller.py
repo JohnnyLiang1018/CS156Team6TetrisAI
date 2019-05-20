@@ -26,8 +26,6 @@ class Controller:
         if (num == 1): return self.blocks.pop(0)
 
 
-
-
 controller=Controller()
 kb=tetris_AI.Kb(controller)
 

@@ -37,8 +37,8 @@ BORDERCOLOR = BLUE
 BGCOLOR = BLACK
 TEXTCOLOR = WHITE
 TEXTSHADOWCOLOR = GRAY
-COLORS      = (     BLUE,      GREEN,      RED,      YELLOW)
-LIGHTCOLORS = (LIGHTBLUE, LIGHTGREEN, LIGHTRED, LIGHTYELLOW)
+COLORS      = (BLACK,     BLUE,      GREEN,      RED,      YELLOW)
+LIGHTCOLORS = (BLACK, LIGHTBLUE, LIGHTGREEN, LIGHTRED, LIGHTYELLOW)
 assert len(COLORS) == len(LIGHTCOLORS) # each color must have light color
 
 TEMPLATEWIDTH = 5
@@ -453,14 +453,23 @@ class game:
 
     def drawBoard_from_AI(self,board):
         board = self.controller.pop(0)
+        gameBoard = game.getBlankBoard(self)
+        # transfer board
+        for x in range(len(board)-1):
+            for y in range(len(board[0])-2):
+                if (board[x][y] == 1): # assume in the board, 1 = empty
+                    gameBoard[y][x] = '.'
+                else:
+                    gameBoard[y][x] == '0' # in case lines are removed
 
         pygame.draw.rect(DISPLAYSURF, BORDERCOLOR,
                          (XMARGIN - 3, TOPMARGIN - 7, (BOARDWIDTH * BOXSIZE) + 8, (BOARDHEIGHT * BOXSIZE) + 8), 5)
         pygame.draw.rect(DISPLAYSURF, BGCOLOR, (XMARGIN, TOPMARGIN, BOXSIZE * BOARDWIDTH, BOXSIZE * BOARDHEIGHT))
 
-        for x in range(board.shape[1]):
-            for y in range(board.shape[0]):
-                game.drawBox_from_AI(self,x, y, board[x][y])
+        for x in range(BOARDWIDTH):
+            for y in range(BOARDHEIGHT):
+                game.drawBox_from_AI(self,x, y, gameBoard[x][y])
+
 
     def drawBoard(self,board):
         # board=self.controller.pop(0)
@@ -511,12 +520,7 @@ class game:
         # draw the "next" piece
         game.drawPiece(self,piece, pixelx=WINDOWWIDTH - 120, pixely=100)
 
-def transfer(gameBoard,controllerBoard):
-    for x in range(controllerBoard):
-        for y in range(controllerBoard[0]):
-            if(controllerBoard[x][y]==1):
-                gameBoard[y][x]='0'
-            else:
-                gameBoard[y][x]=='.'
+
+
 
 
