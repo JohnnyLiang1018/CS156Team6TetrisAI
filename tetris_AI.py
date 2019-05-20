@@ -166,7 +166,7 @@ class Kb:
 
             for num in range(0, Board_length - mask_m):
                 slice = board[height(num) - mask_m + 1:height(num) + 1, :]
-                sum = board.sum()
+                sum = slice.sum()
                 if (board.size - sum != 0 and sum >= 4):
                         shape=Kb.Rec_scanner(self,slice, mask, num, name,type)
                         if(shape != None):

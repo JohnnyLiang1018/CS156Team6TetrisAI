@@ -7,41 +7,48 @@ class kb(object):
 
     # shape representation
     I_shapeCoord = (
-
+        (0,0),(0,1),(0,2),(0,3)
     )
     
     T_shapeCoord = (
-
+        (0,0),(0,1),(-1,1),(1,1)
     )
 
     O_shapeCoord = (
-    
+        (0,0), (0,1), (1,0), (1,1)
     )
 
     S_shapeCoord = (
-      
+        (0,0), (0,1), (-1,1), (-1,2)
     )
 
     L_shapeCoord = (
-       
+        (0,0), (0,1), (0,2), (1,0)
     )
 
     Z_shapeCoord = (
-      
+        (0,0), (0,1), (1,1),(1,2)
     )
 
     J_shapeCoord = (
-    
+        (0,0), (1,0), (1,1), (1,2)
     )
 
-    # current_board 6*6, 0 means empty and 1 means filled
+    # current_board 10*10, 0 means empty and 1 means filled
     board = (
-        [0,0,0,0,0,0],
-        [0,0,0,0,0,0],
-        [0,0,0,0,0,0],
-        [0,0,0,0,0,0],
-        [0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
+        [0,0,0,0,0,0,0,0,0,0],
     )
+    height = 0
+    holes = 0
 
     def __init__(self):
         print("KB initialize")
@@ -108,6 +115,14 @@ class kb(object):
         if (self.task == "display_board"):
             for row in self.board:
                 print(row)
+            return self.board
+
+        if (self.task == "set_board"):
+            self.board = self.param
+            for row in self.board:
+                print(row)
+            
+
 
     def add_shape(self):
         if (self.current_shape == "L"):
