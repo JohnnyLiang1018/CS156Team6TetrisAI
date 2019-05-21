@@ -4,11 +4,11 @@ import kb
 class search:
     
     array = ["J","K",2]
-    knowledge_base =  Kb()
+   # knowledge_base =  Kb()
 
 
-    def __init__(self):
-        self.kb=Kb()
+   # def __init__(self):
+    #    self.kb=Kb()
 
 
     def dfs(self,array,current_board,weight):
@@ -19,7 +19,6 @@ class search:
         if(index == 1):
             self.one_piece_board = current_board
         if(index == 0):
-            self.tetris_logic.board = self.board
             return self.evaluate(current_board)
         print("index " + str(index))
         
@@ -30,8 +29,11 @@ class search:
         
         for k in range(4):
             for x in range(10):
-                at_x_board = self.tetris_logic.valid_y(x,piece,k)
-                if(at_x_board == -1).all():
+
+                tup=valid_y(board,x,piece,k)
+                at_x_board = tup[1]
+
+                if(tup[0]==False):
                     break
                 # y = reasoning.ask(piece)
                 # output = self.tetris_ai.ask(piece)

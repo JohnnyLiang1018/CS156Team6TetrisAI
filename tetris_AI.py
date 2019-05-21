@@ -2,7 +2,7 @@ import numpy as np
 
 
 board=np.append(np.ones(200),np.zeros(10)).reshape(21,10)
-counter=0
+
 
 class Mask:
     I0 = (np.array([[1, 1, 1, 1],
@@ -173,15 +173,14 @@ def wrap(board):
 
 
 def clone(board):
-    x=np.array([])
-    np.copyto(board,x)
+    x=np.zeros(board.size).reshape(board.shape[0],board.shape[1])
+    np.copyto(x,board)
     return x
-
 
 def valid_y(board,x,shape,rotation):
     mask_kit=get_mask_kit(shape,rotation)
     width=mask_kit[0].shape[1]
-    if(width+x>Board_width or x<0):return -1
+    if(width+x>Board_width or x<0):return (False,None)
     slice=vertical_cut(board,mask_kit,x)
     for y in vertical_cut_range(mask_kit):
         area=horizontal_cut(slice,mask_kit,y)
@@ -189,42 +188,10 @@ def valid_y(board,x,shape,rotation):
             tmp=clone(board)
             replace_sub_matrix(tmp, mask_kit, x, y)
 
-            return wrap(tmp)
-
-
-
-class Kb:
-
-    def __init__(self,controller):
-        self.board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
-        self.init_board = np.append(np.ones(220),np.zeros(10)).reshape(23,10)
-        self.one_piece_board = np.append(np.ones(220),np.zeros(10)).reshape(23,10)
-        #self.controller=controller
-        self.controller=controller
-        self.controller.push(board,0)
-
-
-    def store_init_board(self):
-        np.copyto(self.init_board,self.board)
-    
-    def store_one_piece_board(self):
-        np.copyto(self.one_piece_board,self.board)
-
-    def load_init_board(self):
-        np.copyto(self.board,self.load_init_board)
-    
-    def load_one_piece_board(self):
-        np.copyto(self.board,self.one_piece_board)
+            return (True,wrap(tmp))
 
 
 
 
-    def tell(self,result_kit):
-        location=result_kit[2]
-        mask_kits=Mask.mask_dir.get(result_kit[0])
-        mask_kit=mask_kits[result_kit[1]]
-        target = get_sub_matrix(self.board, mask_kit,location[1], location[0])
-        if (bit_match(target, mask_kit)):
-            replace_sub_matrix(self.board, mask_kit, location[1], location[0])
 
 
