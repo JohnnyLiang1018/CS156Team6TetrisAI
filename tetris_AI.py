@@ -151,11 +151,31 @@ def replace_sub_matrix(board,mask_kit,x,y):
 
     board[height(y) - mask_kit[0].shape[0] + 1: height(y) + 1,x:x + mask_kit[0].shape[1]] -= mask_kit[0].real
 
-def post_process(board):
-    board=board[:22,:]
-    board=board-1
+def stk(board):
+    board-=1
     board*=-1
-    return board+0
+    board+=0
+
+    return np.append(board,np.zeros(10)).reshape(Board_length+1,Board_width)
+
+def kts(board):
+    board = board[:20, :]
+    board = board - 1
+    board *= -1
+    return board + 0
+
+#auto transfer board between kb and search
+def wrap(board):
+    if(board.shape[0]==Board_length+1): return kts(board)
+    if(board.shape[0]==Board_length): return stk(board)
+    return None
+############################################
+
+
+def clone(board):
+    x=np.array([])
+    np.copyto(board,x)
+    return x
 
 
 def valid_y(board,x,shape,rotation):
@@ -166,9 +186,11 @@ def valid_y(board,x,shape,rotation):
     for y in vertical_cut_range(mask_kit):
         area=horizontal_cut(slice,mask_kit,y)
         if(bit_match(area,mask_kit)):
-            tmp=board
+            tmp=clone(board)
             replace_sub_matrix(tmp, mask_kit, x, y)
-            return post_process(tmp)
+
+            return wrap(tmp)
+
 
 
 class Kb:
@@ -194,18 +216,7 @@ class Kb:
     def load_one_piece_board(self):
         np.copyto(self.board,self.one_piece_board)
 
-    def valid_y(self,x,shape,rotation):
-        mask_kit=get_mask_kit(shape,rotation)
-        width=mask_kit[0].shape[1]
-        if(width+x>Board_width or x<0):return -1
-        slice=vertical_cut(self.board,mask_kit,x)
-        for y in vertical_cut_range(mask_kit):
-            area=horizontal_cut(slice,mask_kit,y)
-            if(bit_match(area,mask_kit)):
-                tmp=self.board
-                replace_sub_matrix(tmp, mask_kit, x, y)
 
-                return post_process(tmp)
 
 
     def tell(self,result_kit):
@@ -217,11 +228,3 @@ class Kb:
             replace_sub_matrix(self.board, mask_kit, location[1], location[0])
 
 
-kb=Kb()
-kb.tell(("T",0,(0,0)))
-kb.store_init_board()
-x=kb.valid_y(2,"T",0)
-kb.load_init_board()
-
-print(kb.init_board)
-print(kb.board)
