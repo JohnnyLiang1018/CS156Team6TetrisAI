@@ -1,8 +1,9 @@
 import numpy as np
+import random
+import copy
 
+board_1=np.append(np.ones(200),np.zeros(10)).reshape(21,10)
 
-board=np.append(np.ones(200),np.zeros(10)).reshape(21,10)
-counter=0
 
 class Mask:
     I0 = (np.array([[1, 1, 1, 1],
@@ -130,8 +131,8 @@ def vertical_cut(board,mask_kit,x):
     mask_n=mask_kit[0].shape[1]
     slice=board[:,x:x + mask_n]
     return slice
-def vertical_cut_range(mask):
-   return range(0, Board_length - mask[0].shape[1])
+def vertical_range(mask):
+   return range( 0,Board_length - mask[0].shape[1])
 
 
 def horizontal_cut(board,mask_kit,y):
@@ -139,9 +140,9 @@ def horizontal_cut(board,mask_kit,y):
     slice= board[height(y)-mask_m+1:height(y)+1,:]
     return slice
 
-def horizontal_cut_range(mask,direction=1):
-    if(direction==1):return range(0, Board_width - mask[0].shape[0] + 1)
-    if(direction==-1):return range(Board_width - mask[0].shape[0] + 1,0)
+def horizontal_range(board,mask):
+    return range(0, board.shape[1] - mask[0].shape[0] + 1)
+
 
 
 def get_sub_matrix(board,mask_kit,x,y):
@@ -173,58 +174,93 @@ def wrap(board):
 
 
 def clone(board):
-    x=np.array([])
-    np.copyto(board,x)
+
+    x=np.zeros(board.size).reshape(21,10)
+
+    np.copyto(x,board)
     return x
 
 
-def valid_y(board,x,shape,rotation):
+def valid_y_1(board,x,shape,rotation):
     mask_kit=get_mask_kit(shape,rotation)
     width=mask_kit[0].shape[1]
-    if(width+x>Board_width or x<0):return -1
     slice=vertical_cut(board,mask_kit,x)
-    for y in vertical_cut_range(mask_kit):
+    for y in vertical_range(mask_kit):
         area=horizontal_cut(slice,mask_kit,y)
         if(bit_match(area,mask_kit)):
-            tmp=clone(board)
-            replace_sub_matrix(tmp, mask_kit, x, y)
+            result=board
+            replace_sub_matrix(result, mask_kit, x, y)
+            return wrap(result)
 
-            return wrap(tmp)
+def valid_y(board,x,mask_kit):
+    slice = vertical_cut(board, mask_kit, x)
+    for y in vertical_range(mask_kit):
+        area = horizontal_cut(slice, mask_kit, y)
+        if (bit_match(area, mask_kit)):
 
+            result =clone(board)
 
+            replace_sub_matrix(result, mask_kit, x, y)
+            return result
 
-class Kb:
-
-    def __init__(self,controller):
-        self.board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
-        self.init_board = np.append(np.ones(220),np.zeros(10)).reshape(23,10)
-        self.one_piece_board = np.append(np.ones(220),np.zeros(10)).reshape(23,10)
-        #self.controller=controller
-        self.controller=controller
-        self.controller.push(board,0)
-
-
-    def store_init_board(self):
-        np.copyto(self.init_board,self.board)
-    
-    def store_one_piece_board(self):
-        np.copyto(self.one_piece_board,self.board)
-
-    def load_init_board(self):
-        np.copyto(self.board,self.load_init_board)
-    
-    def load_one_piece_board(self):
-        np.copyto(self.board,self.one_piece_board)
+def not_valid_x(x,shape,rotation):
+    mask_kit=get_mask_kit(shape,rotation)
+    width=mask_kit[0].shape[1]
+    if(width+x>Board_width or x<0):
+        return True
+    return False
 
 
 
 
-    def tell(self,result_kit):
-        location=result_kit[2]
-        mask_kits=Mask.mask_dir.get(result_kit[0])
-        mask_kit=mask_kits[result_kit[1]]
-        target = get_sub_matrix(self.board, mask_kit,location[1], location[0])
-        if (bit_match(target, mask_kit)):
-            replace_sub_matrix(self.board, mask_kit, location[1], location[0])
+def depth_first_limit(types,board,weight):
+
+    class Best:
+        def init(self,weight):
+            self.route=list()
+            self.global_minimize_weight=weight
+
+        def update(self,newweight,new_route):
+            if(weight>newweight):
+                self.global_minimize_weight=newweight
+                self.route=copy.deepcopy(new_route)
+    best = Best()
+    best.weight=weight
+    route = list()
+
+    def helper(types, board, weight, route, best):
+
+        # at the end of the tree try to update route,
+        # if it is the best route then update success, other wise keep current best route
+        if (len(types) == 0):
+            best.update(weight, route)
+            return
+        else:
+
+            shapes = Mask.mask_dir.get(types[0])
+            for shape in shapes:
+                for x in horizontal_range(board, shape):
+                    new_board = valid_y(board, x, shape)
+                    
+                    #evaluation needed
+                    new_weight =random.randint(0,6)
+
+                    # like your said, cutoff
+                    if (new_weight < weight):
+                        route.append(new_board)
+                        helper(types[1:], new_board, new_weight, route, best)
+                        route.pop()
+
+    helper(types,board,weight,route,best)
+    #return best next move
+    return best.route[0]
+
+
+#modified evaluate
+x=depth_first_limit(list(["T","L"]),board_1,4)
+
+print(x)
+
+
 
 
