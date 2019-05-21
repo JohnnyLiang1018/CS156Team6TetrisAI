@@ -6,7 +6,7 @@
 import random, time, pygame, sys
 from pygame.locals import *
 
-FPS = 60
+FPS = 30
 WINDOWWIDTH = 640
 WINDOWHEIGHT = 480
 BOXSIZE = 20
@@ -37,8 +37,8 @@ BORDERCOLOR = BLUE
 BGCOLOR = BLACK
 TEXTCOLOR = WHITE
 TEXTSHADOWCOLOR = GRAY
-COLORS      = (     BLUE,      GREEN,      RED,      YELLOW)
-LIGHTCOLORS = (LIGHTBLUE, LIGHTGREEN, LIGHTRED, LIGHTYELLOW)
+COLORS      = (BLACK,     BLUE,      GREEN,      RED,      YELLOW)
+LIGHTCOLORS = (BLACK, LIGHTBLUE, LIGHTGREEN, LIGHTRED, LIGHTYELLOW)
 assert len(COLORS) == len(LIGHTCOLORS) # each color must have light color
 
 TEMPLATEWIDTH = 5
@@ -195,8 +195,7 @@ class game:
                 nextPiece = game.getNewPiece(self)
                 lastFallTime = time.time()  # reset lastFallTime
 
-                if not game.isValidPosition(self,board, fallingPiece):
-                    return  # can't fit a new piece on the board, so game over
+
 
             game.checkForQuit(self)
             for event in pygame.event.get():  # event handling loop
@@ -292,8 +291,8 @@ class game:
             game.drawBoard(self,board)
             game.drawStatus(self,score, level)
             game.drawNextPiece(self,nextPiece)
-            if fallingPiece != None:
-                game.drawPiece(self,fallingPiece)
+            #if fallingPiece != None:
+                #game.drawPiece(self,fallingPiece)
 
             pygame.display.update()
             FPSCLOCK.tick(FPS)
@@ -453,14 +452,23 @@ class game:
 
     def drawBoard_from_AI(self,board):
         board = self.controller.pop(0)
+        gameBoard = game.getBlankBoard(self)
+        # transfer board
+        for x in range(len(board)-1):
+            for y in range(len(board[0])):
+                if (board[x][y] == 1): # assume in the board, 1 = empty
+                    gameBoard[y][x] = '.'
+                else:
+                    gameBoard[y][x] == '0' # in case lines are removed
 
         pygame.draw.rect(DISPLAYSURF, BORDERCOLOR,
                          (XMARGIN - 3, TOPMARGIN - 7, (BOARDWIDTH * BOXSIZE) + 8, (BOARDHEIGHT * BOXSIZE) + 8), 5)
         pygame.draw.rect(DISPLAYSURF, BGCOLOR, (XMARGIN, TOPMARGIN, BOXSIZE * BOARDWIDTH, BOXSIZE * BOARDHEIGHT))
 
-        for x in range(board.shape[1]):
-            for y in range(board.shape[0]):
-                game.drawBox_from_AI(self,x, y, board[x][y])
+        for x in range(BOARDWIDTH):
+            for y in range(BOARDHEIGHT):
+                game.drawBox_from_AI(self,x, y, gameBoard[x][y])
+
 
     def drawBoard(self,board):
         # board=self.controller.pop(0)
@@ -493,16 +501,18 @@ class game:
     def drawPiece(self,piece, pixelx=None, pixely=None):
         shapeToDraw = PIECES[piece['shape']][piece['rotation']]
         if pixelx == None and pixely == None:
-            # if pixelx & pixely hasn't been specified, use the location stored in the piece data structure
+           # if pixelx & pixely hasn't been specified, use the location stored in the piece data structure
             pixelx, pixely = game.convertToPixelCoords(self,piece['x'], piece['y'])
 
-        # draw each of the boxes that make up the piece
+        ## draw each of the boxes that make up the piece
         for x in range(TEMPLATEWIDTH):
             for y in range(TEMPLATEHEIGHT):
                 if shapeToDraw[y][x] != BLANK:
                     game.drawBox(self,None, None, piece['color'], pixelx + (x * BOXSIZE), pixely + (y * BOXSIZE))
 
+
     def drawNextPiece(self,piece):
+
         # draw the "next" text
         nextSurf = BASICFONT.render('Next:', True, TEXTCOLOR)
         nextRect = nextSurf.get_rect()
@@ -511,12 +521,7 @@ class game:
         # draw the "next" piece
         game.drawPiece(self,piece, pixelx=WINDOWWIDTH - 120, pixely=100)
 
-def transfer(gameBoard,controllerBoard):
-    for x in range(controllerBoard):
-        for y in range(controllerBoard[0]):
-            if(controllerBoard[x][y]==1):
-                gameBoard[y][x]='0'
-            else:
-                gameBoard[y][x]=='.'
+
+
 
 

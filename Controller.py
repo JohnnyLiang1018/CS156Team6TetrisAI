@@ -8,62 +8,31 @@
 ############################
 import kb
 import tetromino
-import tetris_AI
+from tetris_AI import *
 
-currentCube = None
-screen_color_matrix = []
-knowledge_base = kb.kb()
+
 class Controller:
     def __init__(self):
-        self.currentCube =None
-        self.currentCube = None
-        self.history=None
-
-    def setCurrentCube(self,currentCube):
-        currentCube = currentCube
-        # print to check if the current piece object is get by the controller
-        # prepare to send
-        #print('get current cube', currentCube)
-        knowledge_base.kb_ask(["display_board",""])
-
-    def updateCurrentCube(self,x, y, dir):
-        currentCube.dir = dir
-        currentCube.center = (x, y)
-
-    def getCurrentCube(self):
-        return currentCube
-
-    def setMatrix(self,matrix):
-        screen_color_matrix = matrix
-        # print('get current matrix', screen_color_matrix)
-
-    def updateMatrix(self,):
-        currentCube.draw()
-        for cube in currentCube.get_all_gridpos():
-            screen_color_matrix[cube[0]][cube[1]] = currentCube.color
-
-    def getMatrix(self):
-        # print to check if the current broad information is get by the controller
-        # prepare to send
-        print('get current matrix', screen_color_matrix)
-        return screen_color_matrix
-        self.blocks=list()
         self.boards=list()
+        self.current_board=None
+        self.blocks=list()
+        self.current_block=None
 
     def push(self,item,num):
         if(num==0): self.boards.append(item)
         if(num==1): self.blocks.append(item)
-        print(item)
 
-    def pop(self,num):
-        if (num == 0): return self.boards.pop(0)
-        if (num == 1): return self.blocks.pop(0)
-
-
+    def pop(self, num):
+        if (num == 0):
+            if (len(self.boards) != 0): self.current_board = self.boards.pop(0)
+            return self.current_board
+        if (num == 1):
+            if (len(self.blocks) != 0): self.current_block = self.blocks.pop(0)
+            return self.current_block
 
 
 controller=Controller()
-kb=tetris_AI.Kb(controller)
+kb=Kb(controller)
 
 game=tetromino.game(controller)
 game.main()

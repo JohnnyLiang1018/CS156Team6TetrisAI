@@ -25,7 +25,7 @@ def draw_grids():
 
 
 clock = pygame.time.Clock()
-FPS = 30
+FPS = 60
 
 running = True
 while running:

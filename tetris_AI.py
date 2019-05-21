@@ -1,7 +1,7 @@
 import numpy as np
 
 
-board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
+board=np.append(np.ones(200),np.zeros(10)).reshape(21,10)
 counter=0
 
 class Mask:
@@ -104,7 +104,7 @@ class Mask:
 
 
 Board_width=10
-Board_length=22
+Board_length=20
 
 def height(num):
     return Board_length - num
@@ -158,16 +158,29 @@ def post_process(board):
     return board+0
 
 
-
+def valid_y(board,x,shape,rotation):
+    mask_kit=get_mask_kit(shape,rotation)
+    width=mask_kit[0].shape[1]
+    if(width+x>Board_width or x<0):return -1
+    slice=vertical_cut(board,mask_kit,x)
+    for y in vertical_cut_range(mask_kit):
+        area=horizontal_cut(slice,mask_kit,y)
+        if(bit_match(area,mask_kit)):
+            tmp=board
+            replace_sub_matrix(tmp, mask_kit, x, y)
+            return post_process(tmp)
 
 
 class Kb:
 
-    def __init__(self):
+    def __init__(self,controller):
         self.board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
         self.init_board = np.append(np.ones(220),np.zeros(10)).reshape(23,10)
         self.one_piece_board = np.append(np.ones(220),np.zeros(10)).reshape(23,10)
         #self.controller=controller
+        self.controller=controller
+        self.controller.push(board,0)
+
 
     def store_init_board(self):
         np.copyto(self.init_board,self.board)

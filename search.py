@@ -4,12 +4,12 @@ import kb
 class search:
     
     array = ["J","K",2]
-    knowledge_base = None
-    tetris_logic = None
+    knowledge_base =  Kb()
+
 
     def __init__(self):
-        self.knowledge_base = kb.kb()
-        self.tetris_logic = Kb()
+        self.kb=Kb()
+
 
     def dfs(self,array,current_board,weight):
         current_array = array
