@@ -165,8 +165,21 @@ class Kb:
 
     def __init__(self):
         self.board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
+        self.init_board = np.append(np.ones(220),np.zeros(10)).reshape(23,10)
+        self.one_piece_board = np.append(np.ones(220),np.zeros(10)).reshape(23,10)
         #self.controller=controller
 
+    def store_init_board(self):
+        np.copyto(self.init_board,self.board)
+    
+    def store_one_piece_board(self):
+        np.copyto(self.one_piece_board,self.board)
+
+    def load_init_board(self):
+        np.copyto(self.board,self.load_init_board)
+    
+    def load_one_piece_board(self):
+        np.copyto(self.board,self.one_piece_board)
 
     def valid_y(self,x,shape,rotation):
         mask_kit=get_mask_kit(shape,rotation)
@@ -193,5 +206,9 @@ class Kb:
 
 kb=Kb()
 kb.tell(("T",0,(0,0)))
+kb.store_init_board()
 x=kb.valid_y(2,"T",0)
-print(x)
+kb.load_init_board()
+
+print(kb.init_board)
+print(kb.board)
