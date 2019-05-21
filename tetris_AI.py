@@ -158,7 +158,17 @@ def post_process(board):
     return board+0
 
 
-
+def valid_y(board,x,shape,rotation):
+    mask_kit=get_mask_kit(shape,rotation)
+    width=mask_kit[0].shape[1]
+    if(width+x>Board_width or x<0):return -1
+    slice=vertical_cut(board,mask_kit,x)
+    for y in vertical_cut_range(mask_kit):
+        area=horizontal_cut(slice,mask_kit,y)
+        if(bit_match(area,mask_kit)):
+            tmp=board
+            replace_sub_matrix(tmp, mask_kit, x, y)
+            return post_process(tmp)
 
 
 class Kb:
