@@ -109,91 +109,89 @@ Board_length=22
 def height(num):
     return Board_length - num
 
+    # vertical cut&& horizontal cut and use it to bit_match
+def bit_match(slice, mask_kit):
+    bit_match = np.multiply(slice, mask_kit[0]).sum()
+    real = bit_match.real.sum()
+    support_limit = mask_kit[1]
+    support = np.abs(bit_match - real)
+    if (support_limit > support and real == 4):
+        return True
+    return False
+
+def get_mask_kit(type, rotation):
+    return Mask.mask_dir.get(type)[rotation]
+
+def get_shape( type, rotation):
+    shape = get_mask_kit(type, rotation)[0].shape
+    return (shape[0] - 1, shape[1])
+
+def vertical_cut(board,mask_kit,x):
+    mask_n=mask_kit[0].shape[1]
+    slice=board[:,x:x + mask_n]
+    return slice
+def vertical_cut_range(mask):
+   return range(0, Board_length - mask[0].shape[1])
+
+
+def horizontal_cut(board,mask_kit,y):
+    mask_m=mask_kit[0].shape[0]
+    slice= board[height(y)-mask_m+1:height(y)+1,:]
+    return slice
+
+def horizontal_cut_range(mask,direction=1):
+    if(direction==1):return range(0, Board_width - mask[0].shape[0] + 1)
+    if(direction==-1):return range(Board_width - mask[0].shape[0] + 1,0)
+
+
+def get_sub_matrix(board,mask_kit,x,y):
+    return horizontal_cut(vertical_cut(board, mask_kit, x), mask_kit, y)
+
+def replace_sub_matrix(board,mask_kit,x,y):
+
+    board[height(y) - mask_kit[0].shape[0] + 1: height(y) + 1,x:x + mask_kit[0].shape[1]] -= mask_kit[0].real
+
+def post_process(board):
+    board=board[:22,:]
+    board=board-1
+    board*=-1
+    return board+0
+
+
+
+
 
 class Kb:
 
-    def __init__(self,controller):
+    def __init__(self):
         self.board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
-        self.controller=controller
-        for x in range(0,100):
-            self.controller.push(self.board,0)
-        # cut slice into small rectangle
-        # slice: an m x n submatrix from getValidPosition
-        #### ###################
-        #### ###################
-        #### ###################
-        # ^
-        # |
-        #target rectangle:  this shape is equal to the shape of mask
-
-    def Rec_scanner(self,board, mask_kit, height, name,type):
-        boardwidth = board.shape[1]
-        mask_n = mask_kit[0].shape[1]
-
-        for num in range(0, boardwidth - mask_n +1):
-            tmp = board[:, num:num + mask_n]
-            if (Kb.bit_match(self,tmp,mask_kit)):
-                return tuple((name,type, (height, num)))
-
-        return None
+        #self.controller=controller
 
 
+    def valid_y(self,x,shape,rotation):
+        mask_kit=get_mask_kit(shape,rotation)
+        width=mask_kit[0].shape[1]
+        if(width+x>Board_width or x<0):return -1
+        slice=vertical_cut(self.board,mask_kit,x)
+        for y in vertical_cut_range(mask_kit):
+            area=horizontal_cut(slice,mask_kit,y)
+            if(bit_match(area,mask_kit)):
+                tmp=self.board
+                replace_sub_matrix(tmp, mask_kit, x, y)
 
+                return post_process(tmp)
 
-
-
-
-    #cut board into slices
-        #######################
-        #######################
-        #######################  <= unseen part of board
-        #######################
-        #######################
-
-        # slice: an m x n submatrix
-              #   n
-        #######################
-   #m   #######################   <- target slice
-        #######################
-        # m= m of mask shape
-    def getValidPositions(self,board, shape):
-        mask_kit = Mask.mask_dir.get(shape)
-        result = list()
-        for mask in mask_kit:
-            name = mask[2]
-            type = mask[3]
-            mask_m = mask[0].shape[0]
-
-            for num in range(0, Board_length - mask_m):
-                slice = board[height(num) - mask_m + 1:height(num) + 1, :]
-                sum = slice.sum()
-                if (board.size - sum != 0 and sum >= 4):
-                        shape=Kb.Rec_scanner(self,slice, mask, num, name,type)
-                        if(shape != None):
-                            result.append(shape)
-                            break
-        return result
-        # is support && have space
-
-    def ask(self,shape):
-        if (self.board.sum() != 0):
-            return Kb.getValidPositions(self, board, shape)
 
     def tell(self,result_kit):
-        loca=result_kit[2]
+        location=result_kit[2]
         mask_kits=Mask.mask_dir.get(result_kit[0])
         mask_kit=mask_kits[result_kit[1]]
-        target=self.board[height(loca[0]) - mask_kit[0].shape[0]+1: height(loca[0])+1, loca[1]:loca[1] + mask_kit[0].shape[1]]
-        if(Kb.bit_match(self,target,mask_kit)):
-            self.board[height(loca[0]) - mask_kit[0].shape[0] + 1: height(loca[0]) + 1,loca[1]:loca[1] + mask_kit[0].shape[1]]=target-mask_kit[0].real
+        target = get_sub_matrix(self.board, mask_kit,location[1], location[0])
+        if (bit_match(target, mask_kit)):
+            replace_sub_matrix(self.board, mask_kit, location[1], location[0])
 
 
-    def bit_match(self,slice,mask_kit):
-        bit_match = np.multiply(slice,mask_kit[0]).sum()
-        real = bit_match.real.sum()
-        support_limit = mask_kit[1]
-        support = np.abs(bit_match - real)
-        if( support_limit >support and real == 4):
-            return True
-
-
+kb=Kb()
+kb.tell(("T",0,(0,0)))
+x=kb.valid_y(2,"T",0)
+print(x)
