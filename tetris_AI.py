@@ -1,7 +1,7 @@
 import numpy as np
 
 
-board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
+board=np.append(np.ones(200),np.zeros(10)).reshape(21,10)
 counter=0
 
 class Mask:
@@ -104,7 +104,7 @@ class Mask:
 
 
 Board_width=10
-Board_length=22
+Board_length=20
 
 def height(num):
     return Board_length - num
@@ -173,9 +173,11 @@ def valid_y(board,x,shape,rotation):
 
 class Kb:
 
-    def __init__(self):
+    def __init__(self,controller):
         self.board=np.append(np.ones(220),np.zeros(10)).reshape(23,10)
-        #self.controller=controller
+        self.controller=controller
+        self.controller.push(board,0)
+
 
 
     def valid_y(self,x,shape,rotation):
@@ -201,7 +203,3 @@ class Kb:
             replace_sub_matrix(self.board, mask_kit, location[1], location[0])
 
 
-kb=Kb()
-kb.tell(("T",0,(0,0)))
-x=kb.valid_y(2,"T",0)
-print(x)
