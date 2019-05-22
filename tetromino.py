@@ -175,7 +175,7 @@ class game:
             game.showTextScreen(self,'DIE', RED, "noob", RED)
 
     def runGame(self):
-        # setup variables for the start of the game
+        # setup variables for the start of tfhe game
         board = game.getBlankBoard(self)
         lastMoveDownTime = time.time()
         lastMoveSidewaysTime = time.time()
@@ -190,10 +190,11 @@ class game:
         nextPiece = game.getNewPiece(self)
 
         while True:  # game loop
+            board = game.getBlankBoard(self)
             if fallingPiece == None:
                 # No falling piece in play, so start a new piece at the top
                 fallingPiece = nextPiece
-                nextPiece = game.getNewPiece(self)
+                nextPiece = self.getNewPiece()
                 lastFallTime = time.time()  # reset lastFallTime
 
 
@@ -219,13 +220,13 @@ class game:
 
                 elif event.type == KEYDOWN:
                     # moving the piece sideways
-                    if (event.key == K_LEFT or event.key == K_a) and game.isValidPosition(self,board, fallingPiece, adjX=-1):
+                    if (event.key == K_LEFT or event.key == K_a):
                         fallingPiece['x'] -= 1
                         movingLeft = True
                         movingRight = False
                         lastMoveSidewaysTime = time.time()
 
-                    elif (event.key == K_RIGHT or event.key == K_d) and game.isValidPosition(self,board, fallingPiece, adjX=1):
+                    elif (event.key == K_RIGHT or event.key == K_d):
                         fallingPiece['x'] += 1
                         movingRight = True
                         movingLeft = False
@@ -263,14 +264,13 @@ class game:
             # handle moving the piece because of user input
             if (movingLeft or movingRight) and time.time() - lastMoveSidewaysTime > MOVESIDEWAYSFREQ:
                 if movingLeft and game.isValidPosition(self,board, fallingPiece, adjX=-1):
-                    fallingPiece['x'] -= 1
+                    continue
                 elif movingRight and game.isValidPosition(self,board, fallingPiece, adjX=1):
-                    fallingPiece['x'] += 1
-                lastMoveSidewaysTime = time.time()
+                    lastMoveSidewaysTime = time.time()
 
             if movingDown and time.time() - lastMoveDownTime > MOVEDOWNFREQ and game.isValidPosition(self,board, fallingPiece,
                                                                                                 adjY=1):
-                fallingPiece['y'] -= 1
+
                 lastMoveDownTime = time.time()
 
             # let the piece fall if it is time to fall
@@ -278,7 +278,7 @@ class game:
                 # see if the piece has landed
                 if not game.isValidPosition(self,board, fallingPiece, adjY=1):
                     # falling piece has landed, set it on the board
-                    game.addToBoard(self,board, fallingPiece)
+
                     score += game.removeCompleteLines(self,board)
                     level, fallFreq = game.calculateLevelAndFallFreq(self,score)
                     fallingPiece = None
@@ -350,7 +350,7 @@ class game:
     def calculateLevelAndFallFreq(self,score):
         # Based on the score, return the level the player is on and
         # how many seconds pass until a falling piece falls one space.
-        level = int(score / 10) + 1
+        level = 0
         fallFreq = 0.27 - (level * 0.02)
         return level, fallFreq
 
@@ -454,7 +454,6 @@ class game:
     def drawBoard_from_AI(self,board):
         AIboard = self.controller.pop(0)
             #np.append(np.random.randint(2, size = 200),np.zeros(10)).reshape(21,10)
-        print("BOARD!!!!!!!",AIboard)
         gameBoard = game.getBlankBoard(self)
 
         # transfer board to the game board

@@ -85,7 +85,7 @@ class search:
     def get_max_height(self,board):
         height = len(board)
         width = len(board[0])
-        max_height = 0
+        max_height = 0z
         for j in range(height):
             for i in range(width):
                 if (board[j][i] == 1):
