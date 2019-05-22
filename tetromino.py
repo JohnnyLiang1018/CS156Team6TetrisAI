@@ -5,13 +5,14 @@
 
 import random, time, pygame, sys
 from pygame.locals import *
+import numpy as np
 
-FPS = 30
+FPS = 10
 WINDOWWIDTH = 640
 WINDOWHEIGHT = 480
 BOXSIZE = 20
 BOARDWIDTH = 10
-BOARDHEIGHT = 22
+BOARDHEIGHT = 20
 BLANK ='.'
 
 MOVESIDEWAYSFREQ = 0.1
@@ -361,8 +362,8 @@ class game:
                     'rotation': random.randint(0, len(PIECES[shape]) - 1),
                     'x': int(BOARDWIDTH / 2) - int(TEMPLATEWIDTH / 2),
                     'y': -2,  # start it above the board (i.e. less than 0)
-                    'color': random.randint(0, len(COLORS) - 1)}
-
+                    'color': 2}
+                    #'color': random.randint(0, len(COLORS) - 1)
 
         return newPiece
 
@@ -378,7 +379,7 @@ class game:
         board = []
 
         for i in range(BOARDWIDTH):
-            board.append([BLANK] * BOARDHEIGHT)
+            board.append([BLANK] * BOARDHEIGHT) #* BOARDHEIGHT
         return board
 
     def isOnBoard(self,x, y):
@@ -447,19 +448,20 @@ class game:
             return
         if pixelx == None and pixely == None:
             pixelx, pixely = game.convertToPixelCoords(self,boxx, boxy)
-        pygame.draw.rect(DISPLAYSURF, COLORS[0], (pixelx + 1, pixely + 1, BOXSIZE - 1, BOXSIZE - 1))
-        pygame.draw.rect(DISPLAYSURF, LIGHTCOLORS[0], (pixelx + 1, pixely + 1, BOXSIZE - 4, BOXSIZE - 4))
+        pygame.draw.rect(DISPLAYSURF, COLORS[2], (pixelx + 1, pixely + 1, BOXSIZE - 1, BOXSIZE - 1))
+        pygame.draw.rect(DISPLAYSURF, LIGHTCOLORS[2], (pixelx + 1, pixely + 1, BOXSIZE - 4, BOXSIZE - 4))
 
     def drawBoard_from_AI(self,board):
-        board = self.controller.pop(0)
+        AIboard = self.controller.pop(0)
+            #np.append(np.random.randint(2, size = 200),np.zeros(10)).reshape(21,10)
+        print("BOARD!!!!!!!",AIboard)
         gameBoard = game.getBlankBoard(self)
-        # transfer board
-        for x in range(len(board)-1):
-            for y in range(len(board[0])):
-                if (board[x][y] == 1): # assume in the board, 1 = empty
-                    gameBoard[y][x] = '.'
-                else:
-                    gameBoard[y][x] == '0' # in case lines are removed
+
+        # transfer board to the game board
+        for x in range(len(AIboard)-1):
+            for y in range(len(AIboard[0])):
+                if (AIboard[x,y] == 1): # assume in the board, 1 = empty
+                    gameBoard[y][x] = 0  # in case lines are removed
 
         pygame.draw.rect(DISPLAYSURF, BORDERCOLOR,
                          (XMARGIN - 3, TOPMARGIN - 7, (BOARDWIDTH * BOXSIZE) + 8, (BOARDHEIGHT * BOXSIZE) + 8), 5)
