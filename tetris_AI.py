@@ -132,7 +132,7 @@ def vertical_cut(board,mask_kit,x):
     slice=board[:,x:x + mask_n]
     return slice
 def vertical_range(mask):
-   return range( 0,Board_length - mask[0].shape[1])
+   return range( 0,Board_length - mask[0].shape[0])
 
 
 def horizontal_cut(board,mask_kit,y):
@@ -140,8 +140,8 @@ def horizontal_cut(board,mask_kit,y):
     slice= board[height(y)-mask_m+1:height(y)+1,:]
     return slice
 
-def horizontal_range(board,mask):
-    return range(0, board.shape[1] - mask[0].shape[0] + 1)
+def horizontal_range(mask):
+    return range(0, Board_width - mask[0].shape[1]+1)
 
 
 
@@ -215,17 +215,49 @@ def not_valid_x(x,shape,rotation):
 
 def depth_first_limit(types,board,weight):
 
+    def evaluate(board):
+        height = Board_length
+        width = Board_width
+        # max_height = self.get_max_height(board)
+        holes = 0
+        pits = 0
+        for j in range(height - 2):
+            count = 0
+            for i in range(width - 2):
+                count = count + board[height - 1 - j][i]
+
+                # check from the bottom to the top
+                if (board[height - 1 - j][i] == 1 and board[height - 2 - j][i] == 0 and board[height - 3 - j][i] == 1):
+                    holes += 1
+                if (board[height - 1 - j][i] == 1 and board[height - 1 - j][i + 1] == 0 and board[height - 1 - j][
+                    i + 2] == 1):
+                    pits += 1
+                if (j == 0 and board[height - 1][i] == 0 and board[height - 2][i] == 1):
+                    holes += 1
+                if (i == 0 and board[height - 1 - j][i] == 0 and board[height - 1 - j][i + 1] == 1):
+                    pits += 1
+                if (i == width - 3 and board[height - 1 - j][i + 1] == 1 and board[height - 1 - j][i + 2] == 0):
+                    pits += 1
+            # if the entire row is empty, this function is finished
+            if (count == 0):
+
+                break
+        weight = holes * 5 + pits * 2
+
+
+        return weight
+
     class Best:
-        def init(self,weight):
-            self.route=list()
-            self.global_minimize_weight=weight
+        def __init__(self,weight):
+            self.route = list()
+            self.global_minimize_weight = weight
 
         def update(self,newweight,new_route):
-            if(weight>newweight):
+            if(self.global_minimize_weight>newweight):
                 self.global_minimize_weight=newweight
                 self.route=copy.deepcopy(new_route)
-    best = Best()
-    best.weight=weight
+    best = Best(weight)
+
     route = list()
 
     def helper(types, board, weight, route, best):
@@ -236,14 +268,11 @@ def depth_first_limit(types,board,weight):
             best.update(weight, route)
             return
         else:
-
             shapes = Mask.mask_dir.get(types[0])
             for shape in shapes:
-                for x in horizontal_range(board, shape):
+                for x in horizontal_range(shape):
                     new_board = valid_y(board, x, shape)
-                    
-                    #evaluation needed
-                    new_weight =random.randint(0,6)
+                    new_weight =evaluate(new_board)
 
                     # like your said, cutoff
                     if (new_weight < weight):
@@ -253,14 +282,9 @@ def depth_first_limit(types,board,weight):
 
     helper(types,board,weight,route,best)
     #return best next move
-    return best.route[0]
+    return best.route
 
-
-#modified evaluate
-x=depth_first_limit(list(["T","L"]),board_1,4)
-
+x=depth_first_limit(list(["T","S","I","L","J","Z"]),board_1,50)
 print(x)
-
-
-
+#
 
