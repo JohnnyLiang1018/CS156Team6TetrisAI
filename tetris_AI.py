@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import copy
+import math
 
 board_1=np.append(np.ones(200),np.zeros(10)).reshape(21,10)
 
@@ -214,11 +215,35 @@ def not_valid_x(x,shape,rotation):
 
 
 def depth_first_limit(types,board,weight):
+    max_height = 0
+    min_height = 0
+    
+    def get_max_height(board):
+        height = len(board)
+        width = len(board[0])
+        max_height = 0
+        for j in range(height):
+            for i in range(width):
+                if (board[j][i] == 0):
+                    max_height = height - j
+                    return max_height
+        return max_height
+    
+    def valid_y(board,x,mask_kit):
+        slice = vertical_cut(board, mask_kit, x)
+        for y in vertical_range(mask_kit):
+            area = horizontal_cut(slice, mask_kit, y)
+            if (bit_match(area, mask_kit)):
+        
+                result =clone(board)
+
+                replace_sub_matrix(result, mask_kit, x, y)
+                return result
 
     def evaluate(board):
         height = Board_length
         width = Board_width
-        # max_height = self.get_max_height(board)
+        max_height = get_max_height(board)
         holes = 0
         pits = 0
         for j in range(height - 2):
@@ -242,8 +267,7 @@ def depth_first_limit(types,board,weight):
             if (count == 0):
 
                 break
-        weight = holes * 5 + pits * 2
-
+        weight = max_height*25 - holes * 5 - pits * 2 
 
         return weight
 
@@ -284,7 +308,7 @@ def depth_first_limit(types,board,weight):
     #return best next move
     return best.route
 
-x=depth_first_limit(list(["T","S","I","L","J","Z"]),board_1,50)
+
+x=depth_first_limit(list(["T","S"]),board_1,1000)
 print(x)
-#
 
